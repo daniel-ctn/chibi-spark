@@ -41,6 +41,10 @@ const envSchema = z.object({
     .default("fal-ai/kling-video/v1.6/standard/image-to-video"),
   ANIMATE_PER_BATCH: z.coerce.number().int().min(0).max(4).default(2),
 
+  // Animation (Replicate fallback)
+  REPLICATE_API_TOKEN: z.string().min(1).optional(),
+  REPLICATE_ANIMATION_VERSION: z.string().min(1).optional(),
+
   // Upstash Redis
   UPSTASH_REDIS_REST_URL: z.string().url().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
