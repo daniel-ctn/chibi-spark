@@ -6,13 +6,11 @@ export function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-24 border-t border-border/60">
-      <div className="container-page flex flex-col items-start justify-between gap-4 py-8 text-sm text-muted-foreground sm:flex-row sm:items-center">
+    <footer className="border-border/60 mt-24 border-t">
+      <div className="container-page text-muted-foreground flex flex-col items-start justify-between gap-4 py-8 text-sm sm:flex-row sm:items-center">
         <div className="flex flex-col gap-1">
-          <span className="font-medium text-foreground">{SITE_NAME}</span>
-          <span>
-            AI-generated chibi art, free to download and use. Made for fun.
-          </span>
+          <span className="text-foreground font-medium">{SITE_NAME}</span>
+          <span>AI-generated chibi art, free to download and use. Made for fun.</span>
         </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <Link href="/gallery" className="hover:text-foreground">

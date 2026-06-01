@@ -11,13 +11,13 @@ export const metadata: Metadata = {
 export default function NotFound() {
   return (
     <div className="container-page flex flex-col items-center justify-center gap-6 py-32 text-center">
-      <p className="text-sm font-medium text-muted-foreground">404</p>
+      <p className="text-muted-foreground text-sm font-medium">404</p>
       <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
         This chibi wandered off.
       </h1>
-      <p className="max-w-md text-sm text-muted-foreground sm:text-base">
-        The page you were looking for doesn&apos;t exist (or hasn&apos;t been
-        dropped yet). Head back home and try again.
+      <p className="text-muted-foreground max-w-md text-sm sm:text-base">
+        The page you were looking for doesn&apos;t exist (or hasn&apos;t been dropped
+        yet). Head back home and try again.
       </p>
       <Button asChild>
         <Link href="/">Back to {SITE_NAME}</Link>

@@ -3,7 +3,13 @@ import type { Metadata } from "next";
 import { ArrowRight, Sparkles, Wand2, Image as ImageIcon, Video } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SITE_TAGLINE } from "@/lib/constants";
 
@@ -35,21 +41,24 @@ export default function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Hero */}
-      <section className="border-b border-border/60">
+      <section className="border-border/60 border-b">
         <div className="container-page flex flex-col items-center gap-8 py-20 text-center sm:py-28">
-          <Badge variant="secondary" className="rounded-full px-3 py-1 text-xs font-medium">
-            <Sparkles className="mr-1.5 h-3.5 w-3.5 text-primary" />
+          <Badge
+            variant="secondary"
+            className="rounded-full px-3 py-1 text-xs font-medium"
+          >
+            <Sparkles className="text-primary mr-1.5 h-3.5 w-3.5" />
             Daily drops, freshly chibified
           </Badge>
 
-          <h1 className="max-w-3xl text-balance text-4xl font-semibold tracking-tight sm:text-5xl md:text-6xl">
+          <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl md:text-6xl">
             Cute chibi art, every day. <span className="text-primary">Free to use.</span>
           </h1>
 
-          <p className="max-w-2xl text-pretty text-base text-muted-foreground sm:text-lg">
-            A new set of 4 AI-generated chibis drops every morning — still images
-            and short animated clips you can download, remix, and share.
-            No account. No paywall. No nonsense.
+          <p className="text-muted-foreground max-w-2xl text-base text-pretty sm:text-lg">
+            A new set of 4 AI-generated chibis drops every morning — still images and
+            short animated clips you can download, remix, and share. No account. No
+            paywall. No nonsense.
           </p>
 
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -71,9 +80,9 @@ export default function HomePage() {
           <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
             How a drop is made
           </h2>
-          <p className="mt-2 max-w-xl text-sm text-muted-foreground sm:text-base">
-            A small, observable pipeline runs once a day. Nothing fancy — just
-            good prompts, good models, and a sprinkle of curation.
+          <p className="text-muted-foreground mt-2 max-w-xl text-sm sm:text-base">
+            A small, observable pipeline runs once a day. Nothing fancy — just good
+            prompts, good models, and a sprinkle of curation.
           </p>
         </div>
 
@@ -81,7 +90,7 @@ export default function HomePage() {
           {HOW_IT_WORKS.map((step) => (
             <Card key={step.title} className="border-border/60">
               <CardHeader>
-                <div className="mb-1 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/20">
+                <div className="bg-primary/10 text-primary ring-primary/20 mb-1 inline-flex h-10 w-10 items-center justify-center rounded-lg ring-1">
                   <step.icon className="h-5 w-5" />
                 </div>
                 <CardTitle className="text-lg">{step.title}</CardTitle>
@@ -98,14 +107,14 @@ export default function HomePage() {
 
       {/* Latest drops placeholder */}
       <section className="container-page pb-20">
-        <div className="rounded-2xl border border-dashed border-border/80 bg-card/40 p-8 text-center sm:p-12">
-          <div className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-accent text-accent-foreground">
+        <div className="border-border/80 bg-card/40 rounded-2xl border border-dashed p-8 text-center sm:p-12">
+          <div className="bg-accent text-accent-foreground mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full">
             <Video className="h-5 w-5" />
           </div>
           <h3 className="text-lg font-semibold">Latest drops appear here</h3>
-          <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-            The first batch is on its way. Once the daily cron runs, you&apos;ll
-            see the newest chibis right on this page.
+          <p className="text-muted-foreground mx-auto mt-1 max-w-md text-sm">
+            The first batch is on its way. Once the daily cron runs, you&apos;ll see the
+            newest chibis right on this page.
           </p>
           <div className="mt-5">
             <Button asChild variant="outline">

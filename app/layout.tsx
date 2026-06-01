@@ -28,14 +28,7 @@ export const metadata: Metadata = {
   },
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
-  keywords: [
-    "chibi",
-    "ai art",
-    "ai generated",
-    "free",
-    "animated chibi",
-    "kawaii",
-  ],
+  keywords: ["chibi", "ai art", "ai generated", "free", "animated chibi", "kawaii"],
   openGraph: {
     title: `${SITE_NAME} — ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,
