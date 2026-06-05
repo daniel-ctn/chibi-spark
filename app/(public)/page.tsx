@@ -3,15 +3,13 @@ import type { Metadata } from "next";
 import { ArrowRight, Sparkles, Wand2, Image as ImageIcon, Video } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ChibiGrid } from "@/components/chibi/chibi-grid";
+import { getGalleryItems } from "@/features/gallery/queries";
 import { SITE_TAGLINE } from "@/lib/constants";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: SITE_TAGLINE,
@@ -37,7 +35,9 @@ const HOW_IT_WORKS = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const latestItems = await getGalleryItems({ limit: 8 });
+
   return (
     <div className="flex flex-col">
       {/* Hero */}
@@ -105,23 +105,32 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Latest drops placeholder */}
+      {/* Latest drops */}
       <section className="container-page pb-20">
-        <div className="border-border/80 bg-card/40 rounded-2xl border border-dashed p-8 text-center sm:p-12">
-          <div className="bg-accent text-accent-foreground mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full">
-            <Video className="h-5 w-5" />
-          </div>
-          <h3 className="text-lg font-semibold">Latest drops appear here</h3>
-          <p className="text-muted-foreground mx-auto mt-1 max-w-md text-sm">
-            The first batch is on its way. Once the daily cron runs, you&apos;ll see the
-            newest chibis right on this page.
-          </p>
-          <div className="mt-5">
-            <Button asChild variant="outline">
-              <Link href="/gallery">Open the gallery</Link>
-            </Button>
-          </div>
+        <div className="mb-8 flex items-center justify-between">
+          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            Latest drops
+          </h2>
+          <Button asChild variant="outline">
+            <Link href="/gallery">
+              View all <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
         </div>
+        {latestItems.length > 0 ? (
+          <ChibiGrid items={latestItems} />
+        ) : (
+          <div className="border-border/80 bg-card/40 rounded-2xl border border-dashed p-8 text-center sm:p-12">
+            <div className="bg-accent text-accent-foreground mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full">
+              <Video className="h-5 w-5" />
+            </div>
+            <h3 className="text-lg font-semibold">Latest drops appear here</h3>
+            <p className="text-muted-foreground mx-auto mt-1 max-w-md text-sm">
+              The first batch is on its way. Once the daily cron runs, you&apos;ll see the
+              newest chibis right on this page.
+            </p>
+          </div>
+        )}
       </section>
     </div>
   );

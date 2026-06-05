@@ -1,12 +1,10 @@
+import { Suspense } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { ChibiGrid } from "@/components/chibi/chibi-grid";
-import {
-  getGalleryItems,
-  getAllTags,
-  type GalleryFilters,
-} from "@/features/gallery/queries";
+import { ChibiGridSkeleton } from "@/components/chibi/chibi-card-skeleton";
+import { GalleryGrid } from "@/components/gallery/gallery-grid";
+import { getAllTags, type GalleryFilters } from "@/features/gallery/queries";
 
 interface GalleryPageProps {
   searchParams: Promise<{
@@ -29,7 +27,7 @@ export default async function GalleryPage({ searchParams }: GalleryPageProps) {
     limit: 50,
   };
 
-  const [items, allTags] = await Promise.all([getGalleryItems(filters), getAllTags()]);
+  const allTags = await getAllTags();
 
   const buildFilterUrl = (baseParams: Record<string, string | undefined>) => {
     const url = new URLSearchParams();
@@ -113,17 +111,9 @@ export default async function GalleryPage({ searchParams }: GalleryPageProps) {
       </div>
 
       {/* Results */}
-      <ChibiGrid items={items} />
-
-      {items.length === 0 && (
-        <div className="mt-12 text-center">
-          <p className="text-muted-foreground">
-            {search || selectedTags.length > 0 || animatedOnly
-              ? "No chibis match your filters. Try adjusting your search."
-              : "No chibis yet. The first batch is on its way!"}
-          </p>
-        </div>
-      )}
+      <Suspense fallback={<ChibiGridSkeleton count={12} />}>
+        <GalleryGrid filters={filters} />
+      </Suspense>
     </div>
   );
 }
