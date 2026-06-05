@@ -1,0 +1,232 @@
+import { env } from "@/lib/env";
+import { logger } from "@/lib/logger";
+import { newId, newSlug } from "@/lib/ids";
+import { openaiText, openaiImage } from "@/lib/ai";
+import { r2Storage } from "@/lib/storage/r2";
+import { CURATED_THEMES } from "@/lib/ai/themes";
+import {
+  createBatch,
+  getBatchByDate,
+  updateBatch,
+  getApprovedProposalsForPicking,
+  markProposalsAsUsed,
+  createChibiItem,
+  createChibiAsset,
+  attachTags,
+  createJob,
+} from "@/lib/db/queries";
+
+export interface DailyDropResult {
+  status: "created" | "skipped_already_done" | "skipped_in_progress" | "failed";
+  batchId?: string;
+  itemCount?: number;
+  animatedCount?: number;
+  themes?: string[];
+  durationMs?: number;
+  error?: string;
+}
+
+export interface DailyDropOptions {
+  triggeredBy?: "cron" | "manual" | "api";
+  date?: Date;
+}
+
+export async function runDailyDrop(
+  opts: DailyDropOptions = {},
+): Promise<DailyDropResult> {
+  const start = Date.now();
+  const date = opts.date ?? new Date();
+  const ymd = date.toISOString().slice(0, 10);
+  const log = logger.child({
+    job: "daily-drop",
+    ymd,
+    triggeredBy: opts.triggeredBy ?? "unknown",
+  });
+
+  log.info("starting daily drop");
+
+  // 1. Idempotency check
+  const existing = await getBatchByDate(ymd);
+  if (existing?.status === "done") {
+    log.info("batch already done, skipping", { batchId: existing.id });
+    return { status: "skipped_already_done", batchId: existing.id };
+  }
+  if (existing?.status === "running") {
+    log.info("batch already running, skipping", { batchId: existing.id });
+    return { status: "skipped_in_progress", batchId: existing.id };
+  }
+
+  // 2. Create or resume batch
+  const batchId = existing?.id ?? newId();
+  if (!existing) {
+    await createBatch({ id: batchId, generationDate: ymd, status: "running" });
+    log.info("created new batch", { batchId });
+  } else {
+    await updateBatch(batchId, { status: "running" });
+    log.info("resumed failed batch", { batchId });
+  }
+
+  try {
+    // 3. Pick themes
+    const approvedProposals = await getApprovedProposalsForPicking(20);
+    const themes = await openaiText.pickDailyThemes({
+      curated: [...CURATED_THEMES],
+      proposals: approvedProposals.map((p) => p.ideaText),
+      count: 4,
+      date: ymd,
+    });
+    log.info("picked themes", { themes });
+
+    // 4. Generate items
+    const items: string[] = [];
+    const animatedItems: string[] = [];
+    const animateCount = env.ANIMATE_PER_BATCH;
+
+    for (let i = 0; i < themes.length; i++) {
+      const theme = themes[i];
+      if (!theme) {
+        log.warn("skipped undefined theme", { index: i });
+        continue;
+      }
+
+      const itemStart = Date.now();
+      const itemLog = log.child({ theme, index: i });
+
+      try {
+        // a. Expand prompt
+        const { prompt } = await openaiText.expandPrompt({ theme });
+        itemLog.info("expanded prompt", { promptLength: prompt.length });
+
+        // b. Generate metadata
+        const { title, shortDescription, tags } = await openaiText.generateMetadata({
+          theme,
+          prompt,
+        });
+        itemLog.info("generated metadata", { title, tags });
+
+        // c. Generate image
+        const { bytes, mimeType, revisedPrompt } = await openaiImage.generate({
+          prompt,
+        });
+        itemLog.info("generated image", {
+          bytes: bytes.length,
+          mimeType,
+        });
+
+        // d. Upload to R2
+        const key = `chibi/items/${ymd}/${newId()}.png`;
+        const upload = await r2Storage.upload({
+          key,
+          body: bytes,
+          contentType: mimeType,
+        });
+        itemLog.info("uploaded to R2", { key, publicUrl: upload.publicUrl });
+
+        // e. Persist item
+        const itemId = newId();
+        const slug = newSlug(title);
+        await createChibiItem({
+          id: itemId,
+          slug,
+          batchId,
+          sourceProposalId: null,
+          title,
+          theme,
+          prompt,
+          revisedPrompt,
+          shortDescription,
+          isAnimated: false,
+          safetyLabel: "safe",
+          publishedAt: new Date(),
+        });
+        await createChibiAsset({
+          id: newId(),
+          chibiItemId: itemId,
+          assetType: "image",
+          provider: "openai",
+          storageKey: key,
+          publicUrl: upload.publicUrl,
+          mimeType,
+          bytes: upload.bytes,
+        });
+        await attachTags(itemId, tags);
+
+        items.push(itemId);
+
+        // f. Queue animation if within quota
+        if (i < animateCount) {
+          const animationJobId = newId();
+          await createJob({
+            id: animationJobId,
+            chibiItemId: itemId,
+            jobType: "animation",
+            status: "queued",
+            provider: "fal",
+            inputPayload: {
+              imageUrl: upload.publicUrl,
+              prompt,
+              motionPrompt: "subtle motion, gentle kawaii animation",
+            },
+          });
+          animatedItems.push(itemId);
+          itemLog.info("queued animation", { animationJobId });
+        }
+
+        itemLog.info("item created", {
+          itemId,
+          elapsed: Date.now() - itemStart,
+        });
+      } catch (err) {
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        itemLog.error("item failed", { error: errorMsg });
+
+        await createJob({
+          id: newId(),
+          chibiItemId: null,
+          jobType: "image",
+          status: "failed",
+          provider: "openai",
+          errorMessage: errorMsg,
+          inputPayload: { theme },
+        });
+      }
+    }
+
+    // 5. Update batch
+    await updateBatch(batchId, {
+      status: "done",
+      itemCount: items.length,
+      completedAt: new Date(),
+    });
+
+    // 6. Mark proposals as used (if any were picked)
+    const usedProposalIds = approvedProposals
+      .filter((p) => themes.some((t) => t.includes(p.ideaText.slice(0, 30))))
+      .map((p) => p.id);
+    if (usedProposalIds.length > 0) {
+      await markProposalsAsUsed(usedProposalIds);
+      log.info("marked proposals as used", { count: usedProposalIds.length });
+    }
+
+    const durationMs = Date.now() - start;
+    log.info("daily drop complete", {
+      itemCount: items.length,
+      animatedCount: animatedItems.length,
+      durationMs,
+    });
+
+    return {
+      status: "created",
+      batchId,
+      itemCount: items.length,
+      animatedCount: animatedItems.length,
+      themes,
+      durationMs,
+    };
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    await updateBatch(batchId, { status: "failed" });
+    log.error("daily drop failed", { error: errorMsg });
+    return { status: "failed", error: errorMsg };
+  }
+}
