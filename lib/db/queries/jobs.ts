@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { generationJobs, type GenerationJob } from "@/lib/db/schema";
 import { newId } from "@/lib/ids";
@@ -49,4 +49,24 @@ export async function updateJob(
     .returning();
   if (!row) throw new Error("Failed to update job");
   return row;
+}
+
+export async function getJob(id: string): Promise<GenerationJob | null> {
+  const [row] = await db
+    .select()
+    .from(generationJobs)
+    .where(eq(generationJobs.id, id))
+    .limit(1);
+  return row ?? null;
+}
+
+export async function getQueuedAnimationJobs(limit: number): Promise<GenerationJob[]> {
+  return db
+    .select()
+    .from(generationJobs)
+    .where(
+      and(eq(generationJobs.status, "queued"), eq(generationJobs.jobType, "animation")),
+    )
+    .orderBy(asc(generationJobs.createdAt))
+    .limit(limit);
 }

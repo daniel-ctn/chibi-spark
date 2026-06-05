@@ -1,4 +1,4 @@
-import { inArray } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   chibiAssets,
@@ -93,6 +93,19 @@ async function ensureTags(names: string[]): Promise<ChibiTag[]> {
   await db.insert(chibiTags).values(rows).onConflictDoNothing({ target: chibiTags.name });
 
   return db.select().from(chibiTags).where(inArray(chibiTags.name, normalized));
+}
+
+export async function updateChibiItem(
+  id: string,
+  updates: Partial<Omit<ChibiItem, "id" | "createdAt">>,
+): Promise<ChibiItem> {
+  const [row] = await db
+    .update(chibiItems)
+    .set(updates)
+    .where(eq(chibiItems.id, id))
+    .returning();
+  if (!row) throw new Error("Failed to update chibi item");
+  return row;
 }
 
 export async function attachTags(itemId: string, tagNames: string[]) {
