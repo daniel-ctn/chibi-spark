@@ -2,7 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/components/site/theme-provider";
 import Turnstile from "react-turnstile";
 import { Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
@@ -24,7 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 export function ProposalForm() {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const siteKey = env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
   const form = useForm<ProposalInput>({
@@ -126,7 +126,7 @@ export function ProposalForm() {
                     sitekey={siteKey}
                     onVerify={(token) => field.onChange(token)}
                     onExpire={() => field.onChange("")}
-                    theme={theme === "dark" ? "dark" : "light"}
+                    theme={resolvedTheme}
                   />
                 ) : (
                   <p className="text-muted-foreground text-sm">

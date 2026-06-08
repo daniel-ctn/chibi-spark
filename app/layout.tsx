@@ -5,6 +5,7 @@ import { SiteShell } from "@/components/site/site-shell";
 import { ThemeProvider } from "@/components/site/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
+import { themeInitScript } from "@/lib/theme";
 
 import "./globals.css";
 
@@ -65,12 +66,8 @@ export default function RootLayout({
       className={`${dmSans.variable} ${fredoka.variable} ${geistMono.variable} h-full`}
     >
       <body className="min-h-full">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <ThemeProvider defaultTheme="light" enableSystem disableTransitionOnChange>
           <SiteShell>{children}</SiteShell>
           <Toaster position="top-center" richColors closeButton />
         </ThemeProvider>
