@@ -20,6 +20,9 @@ export interface DailyDropResult {
   status: "created" | "skipped_already_done" | "skipped_in_progress" | "failed";
   batchId?: string;
   itemCount?: number;
+  expectedCount?: number;
+  failedCount?: number;
+  partial?: boolean;
   animatedCount?: number;
   themes?: string[];
   durationMs?: number;
@@ -204,11 +207,38 @@ export async function runDailyDrop(
     }
 
     // 5. Update batch
+    const expectedCount = picks.length;
+    const failedCount = expectedCount - items.length;
+    const partial = items.length > 0 && failedCount > 0;
+    const batchStatus = items.length === 0 ? "failed" : "done";
+
     await updateBatch(batchId, {
-      status: "done",
+      status: batchStatus,
       itemCount: items.length,
-      completedAt: new Date(),
+      completedAt: batchStatus === "done" ? new Date() : null,
     });
+
+    if (partial) {
+      log.warn("daily drop completed with partial failures", {
+        itemCount: items.length,
+        expectedCount,
+        failedCount,
+      });
+    }
+
+    if (batchStatus === "failed") {
+      const durationMs = Date.now() - start;
+      log.error("daily drop produced no items", { expectedCount, failedCount, durationMs });
+      return {
+        status: "failed",
+        batchId,
+        itemCount: 0,
+        expectedCount,
+        failedCount,
+        error: "All item generations failed",
+        durationMs,
+      };
+    }
 
     // 6. Mark proposals as used
     if (usedProposalIds.length > 0) {
@@ -227,6 +257,9 @@ export async function runDailyDrop(
       status: "created",
       batchId,
       itemCount: items.length,
+      expectedCount,
+      failedCount,
+      partial,
       animatedCount: animatedItems.length,
       themes: picks.map((p) => p.theme),
       durationMs,
