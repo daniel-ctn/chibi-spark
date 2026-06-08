@@ -1,5 +1,9 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@plugin "tailwind-scrollbar" {
+  nocompatible: true;
+  preferredstrategy: "pseudoelements";
+}
 
 @custom-variant dark (&:is(.dark *));
 
@@ -133,6 +137,7 @@
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
     scroll-behavior: smooth;
+    @apply scrollbar-track-muted/35 scrollbar-thumb-primary/35 scrollbar-hover:scrollbar-thumb-primary/55 scrollbar-active:scrollbar-thumb-primary/70 scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar-thin;
   }
 
   body {
@@ -212,5 +217,9 @@
 
   .filter-chip-active {
     @apply border-primary/40 bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground;
+  }
+
+  .scrollbar-chibi {
+    @apply scrollbar-track-muted/35 scrollbar-thumb-primary/35 scrollbar-hover:scrollbar-thumb-primary/55 scrollbar-active:scrollbar-thumb-primary/70 scrollbar-thumb-rounded-full scrollbar-track-rounded-full scrollbar-thin;
   }
 }

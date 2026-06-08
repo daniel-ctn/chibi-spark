@@ -25,7 +25,7 @@ export function ErrorBoundary({ error, reset }: ErrorBoundaryProps) {
             We encountered an unexpected error. Please try again.
           </p>
           {process.env.NODE_ENV === "development" && (
-            <pre className="bg-muted mb-4 overflow-auto rounded p-3 text-left text-xs">
+            <pre className="bg-muted scrollbar-chibi mb-4 overflow-auto rounded p-3 text-left text-xs">
               {error.message}
             </pre>
           )}
