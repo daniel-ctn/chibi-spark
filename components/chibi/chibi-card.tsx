@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Play } from "lucide-react";
@@ -14,23 +17,43 @@ export function ChibiCard({ item }: ChibiCardProps) {
   const imageAsset =
     assets.find((a) => a.assetType === "thumbnail") ??
     assets.find((a) => a.assetType === "image");
+  const animationAsset = assets.find((a) => a.assetType === "animation");
   const displayTags = tags.slice(0, 3);
+  const [hovering, setHovering] = useState(false);
 
   if (!imageAsset) {
     return null;
   }
 
+  const showAnimation = hovering && Boolean(animationAsset);
+
   return (
     <Link href={`/gallery/${chibi.slug}`}>
-      <Card className="group overflow-hidden transition-all hover:shadow-lg">
+      <Card
+        className="group overflow-hidden transition-all hover:shadow-lg"
+        onMouseEnter={() => setHovering(true)}
+        onMouseLeave={() => setHovering(false)}
+      >
         <div className="relative aspect-square overflow-hidden">
-          <Image
-            src={imageAsset.publicUrl}
-            alt={chibi.title}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          />
+          {showAnimation && animationAsset ? (
+            <video
+              src={animationAsset.publicUrl}
+              autoPlay
+              muted
+              loop
+              playsInline
+              className="h-full w-full object-cover"
+              poster={imageAsset.publicUrl}
+            />
+          ) : (
+            <Image
+              src={imageAsset.publicUrl}
+              alt={chibi.title}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          )}
           {chibi.isAnimated && (
             <div className="absolute top-2 right-2">
               <Badge className="gap-1 bg-black/70 text-white hover:bg-black/80">
