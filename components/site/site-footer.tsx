@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { LogoMark } from "@/components/site/logo-mark";
 import { NAV_LINKS, SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
 
 export function SiteFooter() {
@@ -10,9 +11,12 @@ export function SiteFooter() {
       <div className="container-wide py-12">
         <div className="grid gap-10 md:grid-cols-[1.4fr_1fr]">
           <div className="space-y-3">
-            <p className="font-display text-xl font-semibold tracking-tight">
-              {SITE_NAME}
-            </p>
+            <div className="flex items-center gap-3">
+              <LogoMark className="h-9 w-9" />
+              <p className="font-display text-xl font-semibold tracking-tight">
+                {SITE_NAME}
+              </p>
+            </div>
             <p className="text-muted-foreground max-w-md text-sm leading-relaxed">
               {SITE_TAGLINE} Four fresh chibis every morning — stills and short
               animations, free to download and remix.

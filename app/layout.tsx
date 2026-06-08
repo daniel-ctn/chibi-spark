@@ -48,7 +48,13 @@ export const metadata: Metadata = {
     title: `${SITE_NAME} — ${SITE_TAGLINE}`,
     description: SITE_DESCRIPTION,
   },
-  icons: { icon: "/favicon.ico" },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/logo-mark.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
   alternates: {
     types: {
       "application/rss+xml": "/feed.xml",
@@ -63,9 +69,10 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
+      data-scroll-behavior="smooth"
       className={`${dmSans.variable} ${fredoka.variable} ${geistMono.variable} h-full`}
     >
-      <body className="min-h-full">
+      <body className="min-h-full" suppressHydrationWarning>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <ThemeProvider defaultTheme="light" enableSystem disableTransitionOnChange>
           <SiteShell>{children}</SiteShell>

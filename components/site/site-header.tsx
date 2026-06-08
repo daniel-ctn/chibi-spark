@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
 
+import { LogoMark } from "@/components/site/logo-mark";
 import { NAV_LINKS, SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
 import { ThemeToggle } from "@/components/site/theme-toggle";
 import { cn } from "@/lib/utils";
@@ -20,9 +20,7 @@ export function SiteHeader({ className, activePath = "" }: SiteHeaderProps) {
     >
       <div className="container-wide flex h-[4.25rem] items-center justify-between gap-4">
         <Link href="/" className="group inline-flex min-w-0 items-center gap-3">
-          <span className="bg-primary text-primary-foreground grid h-10 w-10 shrink-0 place-items-center rounded-2xl shadow-sm transition-transform duration-300 ease-out group-hover:scale-105">
-            <Sparkles className="h-[18px] w-[18px]" />
-          </span>
+          <LogoMark className="h-10 w-10 shadow-sm transition-transform duration-300 ease-out group-hover:scale-105" />
           <span className="min-w-0">
             <span className="font-display block text-base leading-none font-semibold tracking-tight">
               {SITE_NAME}
