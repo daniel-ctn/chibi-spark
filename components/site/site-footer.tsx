@@ -22,6 +22,9 @@ export function SiteFooter() {
           <Link href="/about" className="hover:text-foreground">
             About
           </Link>
+          <Link href="/feed.xml" className="hover:text-foreground">
+            RSS
+          </Link>
           <span className="text-xs opacity-70">© {year}</span>
         </div>
       </div>
