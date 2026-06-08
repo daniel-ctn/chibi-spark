@@ -5,12 +5,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { GalleryItem } from "@/features/gallery/queries";
+import { ChibiGrid } from "@/components/chibi/chibi-grid";
 
 interface ChibiDetailProps {
   item: GalleryItem;
+  relatedItems?: GalleryItem[];
 }
 
-export function ChibiDetail({ item }: ChibiDetailProps) {
+export function ChibiDetail({ item, relatedItems = [] }: ChibiDetailProps) {
   const { item: chibi, assets, tags, sourceProposal } = item;
   const imageAsset = assets.find((a) => a.assetType === "image");
   const animationAsset = assets.find((a) => a.assetType === "animation");
@@ -167,6 +169,13 @@ export function ChibiDetail({ item }: ChibiDetailProps) {
           </div>
         </div>
       </div>
+
+      {relatedItems.length > 0 && (
+        <section>
+          <h2 className="mb-6 text-2xl font-semibold tracking-tight">Related chibis</h2>
+          <ChibiGrid items={relatedItems} />
+        </section>
+      )}
     </div>
   );
 }

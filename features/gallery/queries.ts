@@ -216,3 +216,45 @@ export async function getChibiBySlug(slug: string): Promise<GalleryItem | null> 
 export async function getAllTags(): Promise<ChibiTag[]> {
   return db.select().from(chibiTags).orderBy(chibiTags.name);
 }
+
+export async function getRelatedItems(slug: string, limit = 4): Promise<GalleryItem[]> {
+  const current = await getChibiBySlug(slug);
+  if (!current) return [];
+
+  const excludeId = current.item.id;
+  const collected: GalleryItem[] = [];
+  const seen = new Set<string>([excludeId]);
+
+  const addItems = (items: GalleryItem[]) => {
+    for (const entry of items) {
+      if (seen.has(entry.item.id)) continue;
+      seen.add(entry.item.id);
+      collected.push(entry);
+      if (collected.length >= limit) return;
+    }
+  };
+
+  if (current.item.batchId) {
+    addItems(
+      await getGalleryItems({
+        batchId: current.item.batchId,
+        limit: limit + 1,
+      }),
+    );
+  }
+
+  if (collected.length < limit && current.tags.length > 0) {
+    addItems(
+      await getGalleryItems({
+        tags: current.tags.slice(0, 3).map((tag) => tag.slug),
+        limit: limit + 5,
+      }),
+    );
+  }
+
+  if (collected.length < limit) {
+    addItems(await getGalleryItems({ limit: limit + 5 }));
+  }
+
+  return collected.slice(0, limit);
+}

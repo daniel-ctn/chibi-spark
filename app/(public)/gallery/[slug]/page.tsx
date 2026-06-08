@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ChibiDetail } from "@/components/chibi/chibi-detail";
-import { getChibiBySlug } from "@/features/gallery/queries";
+import { getChibiBySlug, getRelatedItems } from "@/features/gallery/queries";
 import { incrementChibiViewCount } from "@/lib/db/queries/chibi-items";
 
 interface DetailPageProps {
@@ -48,11 +48,12 @@ export default async function DetailPage({ params }: DetailPageProps) {
     notFound();
   }
 
+  const relatedItems = await getRelatedItems(slug);
   await incrementChibiViewCount(slug);
 
   return (
     <div className="container-page py-8">
-      <ChibiDetail item={item} />
+      <ChibiDetail item={item} relatedItems={relatedItems} />
     </div>
   );
 }
