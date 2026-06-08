@@ -1,12 +1,29 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowRight, Calendar, Sparkles, Wand2, Image as ImageIcon, Video } from "lucide-react";
+import {
+  ArrowRight,
+  Calendar,
+  Sparkles,
+  Wand2,
+  Image as ImageIcon,
+  Video,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ChibiGrid } from "@/components/chibi/chibi-grid";
-import { getDropByDate, getGalleryItems, todayUtcDateString } from "@/features/gallery/queries";
+import {
+  getDropByDate,
+  getGalleryItems,
+  todayUtcDateString,
+} from "@/features/gallery/queries";
 import { SITE_TAGLINE } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";

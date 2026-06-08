@@ -13,7 +13,11 @@ interface GalleryGridProps {
   buildPageUrl: (page: number) => string;
 }
 
-export async function GalleryGrid({ filters, currentPage, buildPageUrl }: GalleryGridProps) {
+export async function GalleryGrid({
+  filters,
+  currentPage,
+  buildPageUrl,
+}: GalleryGridProps) {
   const [items, total] = await Promise.all([
     getGalleryItems(filters),
     getGalleryItemCount(filters),

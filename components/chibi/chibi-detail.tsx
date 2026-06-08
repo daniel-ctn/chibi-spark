@@ -85,7 +85,10 @@ export function ChibiDetail({ item }: ChibiDetailProps) {
               <div className="flex flex-wrap gap-2">
                 {tags.map((tag) => (
                   <Link key={tag.id} href={`/gallery?tags=${tag.slug}`}>
-                    <Badge variant="secondary" className="cursor-pointer hover:bg-secondary/80">
+                    <Badge
+                      variant="secondary"
+                      className="hover:bg-secondary/80 cursor-pointer"
+                    >
                       {tag.name}
                     </Badge>
                   </Link>

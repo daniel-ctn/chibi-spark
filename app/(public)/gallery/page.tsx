@@ -4,7 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ChibiGridSkeleton } from "@/components/chibi/chibi-card-skeleton";
 import { GalleryGrid } from "@/components/gallery/gallery-grid";
-import { GALLERY_PAGE_SIZE, getAllTags, type GalleryFilters } from "@/features/gallery/queries";
+import {
+  GALLERY_PAGE_SIZE,
+  getAllTags,
+  type GalleryFilters,
+} from "@/features/gallery/queries";
 
 interface GalleryPageProps {
   searchParams: Promise<{
@@ -21,8 +25,7 @@ export default async function GalleryPage({ searchParams }: GalleryPageProps) {
   const selectedTags = params.tags ? params.tags.split(",") : [];
   const animatedOnly = params.animated === "true";
   const rawPage = Number(params.page ?? "1");
-  const currentPage =
-    Number.isFinite(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1;
+  const currentPage = Number.isFinite(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1;
 
   const filters: GalleryFilters = {
     search: search || undefined,

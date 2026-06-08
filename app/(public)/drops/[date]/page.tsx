@@ -6,10 +6,7 @@ import { ArrowLeft, Calendar } from "lucide-react";
 import { ChibiGrid } from "@/components/chibi/chibi-grid";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  getDropByDate,
-  getRecentDropDates,
-} from "@/features/gallery/queries";
+import { getDropByDate, getRecentDropDates } from "@/features/gallery/queries";
 
 interface DropPageProps {
   params: Promise<{ date: string }>;
