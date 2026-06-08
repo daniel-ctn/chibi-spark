@@ -31,11 +31,10 @@ export interface GalleryItem {
   sourceProposal?: Pick<Proposal, "id" | "nickname" | "ideaText"> | null;
 }
 
-export async function getGalleryItems(
-  filters: GalleryFilters = {},
-): Promise<GalleryItem[]> {
-  const { search, tags, animatedOnly, limit = 50, offset = 0 } = filters;
+export const GALLERY_PAGE_SIZE = 24;
 
+async function buildGalleryConditions(filters: GalleryFilters) {
+  const { search, tags, animatedOnly, batchId } = filters;
   const conditions = [];
 
   if (search) {
@@ -52,8 +51,8 @@ export async function getGalleryItems(
     conditions.push(eq(chibiItems.isAnimated, true));
   }
 
-  if (filters.batchId) {
-    conditions.push(eq(chibiItems.batchId, filters.batchId));
+  if (batchId) {
+    conditions.push(eq(chibiItems.batchId, batchId));
   }
 
   if (tags && tags.length > 0) {
@@ -62,33 +61,56 @@ export async function getGalleryItems(
       .from(chibiTags)
       .where(inArray(chibiTags.slug, tags));
 
-    if (tagIds.length > 0) {
-      const itemIds = await db
-        .select({ chibiItemId: chibiItemTags.chibiItemId })
-        .from(chibiItemTags)
-        .where(
-          inArray(
-            chibiItemTags.tagId,
-            tagIds.map((t) => t.id),
-          ),
-        );
-
-      if (itemIds.length > 0) {
-        conditions.push(
-          inArray(
-            chibiItems.id,
-            itemIds.map((i) => i.chibiItemId),
-          ),
-        );
-      } else {
-        return [];
-      }
-    } else {
-      return [];
+    if (tagIds.length === 0) {
+      return { whereClause: undefined, empty: true as const };
     }
+
+    const itemIds = await db
+      .select({ chibiItemId: chibiItemTags.chibiItemId })
+      .from(chibiItemTags)
+      .where(
+        inArray(
+          chibiItemTags.tagId,
+          tagIds.map((t) => t.id),
+        ),
+      );
+
+    if (itemIds.length === 0) {
+      return { whereClause: undefined, empty: true as const };
+    }
+
+    conditions.push(
+      inArray(
+        chibiItems.id,
+        itemIds.map((i) => i.chibiItemId),
+      ),
+    );
   }
 
-  const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+  return {
+    whereClause: conditions.length > 0 ? and(...conditions) : undefined,
+    empty: false as const,
+  };
+}
+
+export async function getGalleryItemCount(filters: GalleryFilters = {}): Promise<number> {
+  const { whereClause, empty } = await buildGalleryConditions(filters);
+  if (empty) return 0;
+
+  const [row] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(chibiItems)
+    .where(whereClause);
+
+  return row?.count ?? 0;
+}
+
+export async function getGalleryItems(
+  filters: GalleryFilters = {},
+): Promise<GalleryItem[]> {
+  const { limit = 50, offset = 0 } = filters;
+  const { whereClause, empty } = await buildGalleryConditions(filters);
+  if (empty) return [];
 
   const items = await db
     .select()

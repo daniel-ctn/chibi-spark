@@ -4,13 +4,14 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ChibiGridSkeleton } from "@/components/chibi/chibi-card-skeleton";
 import { GalleryGrid } from "@/components/gallery/gallery-grid";
-import { getAllTags, type GalleryFilters } from "@/features/gallery/queries";
+import { GALLERY_PAGE_SIZE, getAllTags, type GalleryFilters } from "@/features/gallery/queries";
 
 interface GalleryPageProps {
   searchParams: Promise<{
     q?: string;
     tags?: string;
     animated?: string;
+    page?: string;
   }>;
 }
 
@@ -19,39 +20,63 @@ export default async function GalleryPage({ searchParams }: GalleryPageProps) {
   const search = params.q || "";
   const selectedTags = params.tags ? params.tags.split(",") : [];
   const animatedOnly = params.animated === "true";
+  const rawPage = Number(params.page ?? "1");
+  const currentPage =
+    Number.isFinite(rawPage) && rawPage > 0 ? Math.floor(rawPage) : 1;
 
   const filters: GalleryFilters = {
     search: search || undefined,
     tags: selectedTags.length > 0 ? selectedTags : undefined,
     animatedOnly: animatedOnly || undefined,
-    limit: 50,
+    limit: GALLERY_PAGE_SIZE,
+    offset: (currentPage - 1) * GALLERY_PAGE_SIZE,
   };
 
   const allTags = await getAllTags();
 
-  const buildFilterUrl = (baseParams: Record<string, string | undefined>) => {
+  const buildGalleryQuery = (opts: {
+    page?: number;
+    addTag?: string;
+    removeTag?: string;
+    toggleAnimated?: string;
+  }) => {
     const url = new URLSearchParams();
     if (search) url.set("q", search);
-    if (animatedOnly) url.set("animated", "true");
 
     const mergedTags = new Set(selectedTags);
-    if (baseParams.addTag) mergedTags.add(baseParams.addTag);
-    if (baseParams.removeTag) mergedTags.delete(baseParams.removeTag);
-    if (baseParams.toggleAnimated !== undefined) {
-      if (baseParams.toggleAnimated === "true") {
+    if (opts.addTag) mergedTags.add(opts.addTag);
+    if (opts.removeTag) mergedTags.delete(opts.removeTag);
+
+    if (opts.toggleAnimated !== undefined) {
+      if (opts.toggleAnimated === "true") {
         url.set("animated", "true");
-      } else {
-        url.delete("animated");
       }
+    } else if (animatedOnly) {
+      url.set("animated", "true");
     }
 
     if (mergedTags.size > 0) {
       url.set("tags", Array.from(mergedTags).join(","));
     }
 
+    const page = opts.page ?? 1;
+    if (page > 1) {
+      url.set("page", String(page));
+    }
+
     const queryString = url.toString();
     return queryString ? `/gallery?${queryString}` : "/gallery";
   };
+
+  const buildFilterUrl = (baseParams: Record<string, string | undefined>) =>
+    buildGalleryQuery({
+      page: 1,
+      addTag: baseParams.addTag,
+      removeTag: baseParams.removeTag,
+      toggleAnimated: baseParams.toggleAnimated,
+    });
+
+  const buildPageUrl = (page: number) => buildGalleryQuery({ page });
 
   return (
     <div className="container-page py-8">
@@ -112,7 +137,11 @@ export default async function GalleryPage({ searchParams }: GalleryPageProps) {
 
       {/* Results */}
       <Suspense fallback={<ChibiGridSkeleton count={12} />}>
-        <GalleryGrid filters={filters} />
+        <GalleryGrid
+          filters={filters}
+          currentPage={currentPage}
+          buildPageUrl={buildPageUrl}
+        />
       </Suspense>
     </div>
   );

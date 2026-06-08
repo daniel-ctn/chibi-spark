@@ -1,12 +1,24 @@
 import { ChibiGrid } from "@/components/chibi/chibi-grid";
-import { getGalleryItems, type GalleryFilters } from "@/features/gallery/queries";
+import { GalleryPagination } from "@/components/gallery/gallery-pagination";
+import {
+  GALLERY_PAGE_SIZE,
+  getGalleryItemCount,
+  getGalleryItems,
+  type GalleryFilters,
+} from "@/features/gallery/queries";
 
 interface GalleryGridProps {
   filters: GalleryFilters;
+  currentPage: number;
+  buildPageUrl: (page: number) => string;
 }
 
-export async function GalleryGrid({ filters }: GalleryGridProps) {
-  const items = await getGalleryItems(filters);
+export async function GalleryGrid({ filters, currentPage, buildPageUrl }: GalleryGridProps) {
+  const [items, total] = await Promise.all([
+    getGalleryItems(filters),
+    getGalleryItemCount(filters),
+  ]);
+  const totalPages = Math.max(1, Math.ceil(total / GALLERY_PAGE_SIZE));
 
   return (
     <>
@@ -20,6 +32,11 @@ export async function GalleryGrid({ filters }: GalleryGridProps) {
           </p>
         </div>
       )}
+      <GalleryPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        buildPageUrl={buildPageUrl}
+      />
     </>
   );
 }
