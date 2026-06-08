@@ -4,82 +4,86 @@
 @custom-variant dark (&:is(.dark *));
 
 /* ──────────────────────────────────────────────────────────────────────────
- * ChibiDrop design tokens
+ * ChibiDrop — "Morning Zine" design system
  *
- *  - Surfaces use a warm zinc (almost-white in light, near-black in dark).
- *  - Primary is a soft rose-pink to give the app a friendly, chibi feel
- *    without going childish.
- *  - Accent is a slightly warmer version of the same hue, used for soft
- *    surfaces (badges, chips, hover).
- *  - No gradients by design (per project guidelines).
+ * Warm cream surfaces, coral sakura primary, soft mint accents.
+ * Display type: Fredoka. Body: DM Sans. Art-first, sticker-shop energy.
  * ────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 240 10% 3.9%;
+  --background: 32 45% 97%;
+  --foreground: 22 28% 16%;
 
   --card: 0 0% 100%;
-  --card-foreground: 240 10% 3.9%;
+  --card-foreground: 22 28% 16%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 240 10% 3.9%;
+  --popover-foreground: 22 28% 16%;
 
-  --primary: 340 78% 60%;
+  --primary: 346 72% 56%;
   --primary-foreground: 0 0% 100%;
 
-  --secondary: 240 4.8% 95.9%;
-  --secondary-foreground: 240 5.9% 10%;
+  --secondary: 158 32% 90%;
+  --secondary-foreground: 158 35% 22%;
 
-  --muted: 240 4.8% 95.9%;
-  --muted-foreground: 240 3.8% 46.1%;
+  --muted: 32 24% 93%;
+  --muted-foreground: 22 12% 42%;
 
-  --accent: 340 80% 96%;
-  --accent-foreground: 340 70% 30%;
+  --accent: 346 55% 94%;
+  --accent-foreground: 346 55% 32%;
 
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 98%;
+  --destructive: 0 72% 52%;
+  --destructive-foreground: 0 0% 100%;
 
-  --success: 142 71% 45%;
+  --success: 158 45% 38%;
   --success-foreground: 0 0% 100%;
 
-  --border: 240 5.9% 90%;
-  --input: 240 5.9% 90%;
-  --ring: 340 78% 60%;
+  --border: 32 18% 86%;
+  --input: 32 18% 86%;
+  --ring: 346 72% 56%;
 
-  --radius: 0.75rem;
+  --radius: 1rem;
+
+  --surface-elevated: 0 0% 100%;
+  --surface-inset: 32 30% 95%;
+  --dot-color: 346 40% 80%;
 }
 
 .dark {
-  --background: 240 10% 4%;
-  --foreground: 0 0% 98%;
+  --background: 268 18% 9%;
+  --foreground: 32 25% 94%;
 
-  --card: 240 10% 6%;
-  --card-foreground: 0 0% 98%;
+  --card: 268 16% 12%;
+  --card-foreground: 32 25% 94%;
 
-  --popover: 240 10% 6%;
-  --popover-foreground: 0 0% 98%;
+  --popover: 268 16% 12%;
+  --popover-foreground: 32 25% 94%;
 
-  --primary: 340 80% 70%;
-  --primary-foreground: 240 10% 4%;
+  --primary: 346 68% 62%;
+  --primary-foreground: 268 18% 9%;
 
-  --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 0 0% 98%;
+  --secondary: 158 22% 18%;
+  --secondary-foreground: 158 35% 78%;
 
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
+  --muted: 268 12% 16%;
+  --muted-foreground: 32 10% 62%;
 
-  --accent: 340 30% 18%;
-  --accent-foreground: 340 80% 82%;
+  --accent: 346 28% 18%;
+  --accent-foreground: 346 60% 82%;
 
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 0 0% 98%;
+  --destructive: 0 62% 45%;
+  --destructive-foreground: 0 0% 100%;
 
-  --success: 142 60% 50%;
-  --success-foreground: 0 0% 98%;
+  --success: 158 40% 42%;
+  --success-foreground: 0 0% 100%;
 
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
-  --ring: 340 80% 70%;
+  --border: 268 12% 20%;
+  --input: 268 12% 20%;
+  --ring: 346 68% 62%;
+
+  --surface-elevated: 268 14% 14%;
+  --surface-inset: 268 16% 8%;
+  --dot-color: 346 20% 28%;
 }
 
 @theme inline {
@@ -104,15 +108,18 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
+  --color-surface-elevated: hsl(var(--surface-elevated));
+  --color-surface-inset: hsl(var(--surface-inset));
 
-  --radius-sm: calc(var(--radius) - 4px);
+  --radius-sm: calc(var(--radius) - 6px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 6px);
+  --radius-2xl: calc(var(--radius) + 12px);
 
-  --font-sans:
-    var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display:
+    var(--font-fredoka), var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono:
     var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
@@ -125,6 +132,7 @@
   html {
     -webkit-text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
   }
 
   body {
@@ -132,13 +140,77 @@
     font-family: var(--font-sans);
   }
 
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
   ::selection {
-    background: hsl(var(--primary) / 0.25);
+    background: hsl(var(--primary) / 0.22);
+    color: hsl(var(--foreground));
   }
 }
 
 @layer components {
   .container-page {
     @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .container-wide {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .surface-dots {
+    background-color: hsl(var(--background));
+    background-image: radial-gradient(hsl(var(--dot-color) / 0.35) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  .surface-panel {
+    @apply border-border/70 bg-surface-elevated rounded-2xl border shadow-sm;
+  }
+
+  .surface-inset {
+    @apply bg-surface-inset rounded-2xl;
+  }
+
+  .sticker-frame {
+    @apply bg-card border-border/80 rounded-2xl border p-2 shadow-md transition-[transform,box-shadow] duration-300 ease-out;
+  }
+
+  .sticker-frame:hover {
+    @apply shadow-lg;
+    transform: translateY(-3px);
+  }
+
+  .pill-tag {
+    @apply bg-secondary/80 text-secondary-foreground inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
+  }
+
+  .section-kicker {
+    @apply text-primary font-display text-xs font-semibold tracking-[0.14em] uppercase;
+  }
+
+  .nav-link {
+    @apply text-muted-foreground hover:text-foreground hover:bg-accent/80 rounded-full px-3.5 py-2 text-sm font-medium transition-colors;
+  }
+
+  .nav-link-active {
+    @apply bg-accent text-accent-foreground;
+  }
+
+  .filter-chip {
+    @apply border-border/80 bg-card text-foreground hover:border-primary/30 hover:bg-accent/60 inline-flex cursor-pointer items-center rounded-full border px-3 py-1.5 text-xs font-medium transition-colors;
+  }
+
+  .filter-chip-active {
+    @apply border-primary/40 bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground;
   }
 }
