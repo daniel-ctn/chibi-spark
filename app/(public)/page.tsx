@@ -11,6 +11,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { ChibiGrid } from "@/components/chibi/chibi-grid";
+import { HeroShowcase } from "@/components/home/hero-showcase";
 import { SectionHeading } from "@/components/site/page-header";
 import {
   getDropByDate,
@@ -57,11 +58,8 @@ export default async function HomePage() {
 
   return (
     <div className="flex flex-col">
-      <section className="border-border/70 relative overflow-hidden border-b">
-        <div className="bg-primary/10 pointer-events-none absolute -top-16 -right-10 h-56 w-56 rounded-full" />
-        <div className="bg-secondary/80 pointer-events-none absolute bottom-8 -left-10 h-40 w-40 rounded-full" />
-
-        <div className="container-wide relative grid items-center gap-10 py-16 sm:py-20 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
+      <section className="border-border/70 border-b">
+        <div className="container-wide grid items-center gap-10 py-16 sm:py-20 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
           <div className="space-y-6">
             <p className="section-kicker inline-flex items-center gap-2">
               <CalendarDays className="h-3.5 w-3.5" />
@@ -88,22 +86,28 @@ export default async function HomePage() {
                 <Link href="/propose">Propose an idea</Link>
               </Button>
             </div>
+
+            <dl className="flex flex-wrap gap-3 pt-2">
+              {[
+                { label: "New daily", value: "4 chibis" },
+                { label: "Cost", value: "Free" },
+                { label: "Sign-up", value: "None" },
+              ].map((stat) => (
+                <div key={stat.label} className="surface-inset rounded-xl px-4 py-2.5">
+                  <dt className="text-muted-foreground text-[11px] font-medium tracking-wide uppercase">
+                    {stat.label}
+                  </dt>
+                  <dd className="font-display mt-0.5 text-base font-semibold">
+                    {stat.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
           </div>
 
-          <div className="surface-panel grid gap-3 p-5 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-            {[
-              { label: "New daily", value: "4 chibis" },
-              { label: "Cost", value: "Free" },
-              { label: "Sign-up", value: "None" },
-            ].map((stat) => (
-              <div key={stat.label} className="surface-inset rounded-xl px-4 py-3">
-                <p className="text-muted-foreground text-[11px] font-medium tracking-wide uppercase">
-                  {stat.label}
-                </p>
-                <p className="font-display mt-1 text-lg font-semibold">{stat.value}</p>
-              </div>
-            ))}
-          </div>
+          <HeroShowcase
+            galleryItems={latestItems.length >= 4 ? latestItems : undefined}
+          />
         </div>
       </section>
 
