@@ -55,6 +55,9 @@ const envSchema = z.object({
 
   // Cron
   CRON_SECRET: z.string().min(16).optional(),
+
+  // Admin dashboard
+  ADMIN_SECRET: z.string().min(16).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

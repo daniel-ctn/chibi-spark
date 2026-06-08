@@ -1,4 +1,4 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { generationJobs, type GenerationJob } from "@/lib/db/schema";
 import { newId } from "@/lib/ids";
@@ -69,4 +69,22 @@ export async function getQueuedAnimationJobs(limit: number): Promise<GenerationJ
     )
     .orderBy(asc(generationJobs.createdAt))
     .limit(limit);
+}
+
+export async function getFailedJobs(limit: number): Promise<GenerationJob[]> {
+  return db
+    .select()
+    .from(generationJobs)
+    .where(eq(generationJobs.status, "failed"))
+    .orderBy(desc(generationJobs.createdAt))
+    .limit(limit);
+}
+
+export async function requeueJob(id: string): Promise<GenerationJob> {
+  return updateJob(id, {
+    status: "queued",
+    errorMessage: null,
+    startedAt: null,
+    completedAt: null,
+  });
 }

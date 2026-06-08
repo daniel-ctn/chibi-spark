@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { proposals, type Proposal } from "@/lib/db/schema";
 import { newId } from "@/lib/ids";
@@ -37,4 +37,44 @@ export async function getApprovedProposalsForPicking(limit: number) {
 export async function markProposalsAsUsed(ids: string[]) {
   if (ids.length === 0) return;
   await db.update(proposals).set({ status: "used" }).where(inArray(proposals.id, ids));
+}
+
+export async function getProposalsForReview(limit = 50) {
+  return db
+    .select()
+    .from(proposals)
+    .where(
+      and(
+        eq(proposals.status, "pending"),
+        inArray(proposals.safetyLabel, ["safe", "borderline"]),
+      ),
+    )
+    .orderBy(desc(proposals.createdAt))
+    .limit(limit);
+}
+
+export async function updateProposal(
+  id: string,
+  updates: Partial<Pick<Proposal, "status" | "safetyLabel">>,
+) {
+  const [row] = await db
+    .update(proposals)
+    .set(updates)
+    .where(eq(proposals.id, id))
+    .returning();
+  if (!row) throw new Error("Failed to update proposal");
+  return row;
+}
+
+export async function countProposalsBySafety() {
+  const rows = await db
+    .select({
+      safetyLabel: proposals.safetyLabel,
+      count: sql<number>`count(*)::int`,
+    })
+    .from(proposals)
+    .where(eq(proposals.status, "pending"))
+    .groupBy(proposals.safetyLabel);
+
+  return rows;
 }
