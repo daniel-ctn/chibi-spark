@@ -11,7 +11,9 @@ interface ChibiCardProps {
 
 export function ChibiCard({ item }: ChibiCardProps) {
   const { item: chibi, assets, tags } = item;
-  const imageAsset = assets.find((a) => a.assetType === "image");
+  const imageAsset =
+    assets.find((a) => a.assetType === "thumbnail") ??
+    assets.find((a) => a.assetType === "image");
   const displayTags = tags.slice(0, 3);
 
   if (!imageAsset) {

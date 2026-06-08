@@ -3,6 +3,7 @@ import { logger } from "@/lib/logger";
 import { newId, newSlug } from "@/lib/ids";
 import { openaiText, openaiImage } from "@/lib/ai";
 import { r2Storage } from "@/lib/storage/r2";
+import { createThumbnail } from "@/lib/images/thumbnail";
 import { CURATED_THEMES } from "@/lib/ai/themes";
 import {
   createBatch,
@@ -135,6 +136,15 @@ export async function runDailyDrop(
         // e. Persist item
         const itemId = newId();
         const slug = newSlug(title);
+
+        const thumbnail = await createThumbnail(Buffer.from(bytes));
+        const thumbKey = `chibi/thumbnails/${ymd}/${itemId}.webp`;
+        const thumbUpload = await r2Storage.upload({
+          key: thumbKey,
+          body: thumbnail.bytes,
+          contentType: thumbnail.mimeType,
+        });
+
         await createChibiItem({
           id: itemId,
           slug,
@@ -158,6 +168,18 @@ export async function runDailyDrop(
           publicUrl: upload.publicUrl,
           mimeType,
           bytes: upload.bytes,
+        });
+        await createChibiAsset({
+          id: newId(),
+          chibiItemId: itemId,
+          assetType: "thumbnail",
+          provider: "openai",
+          storageKey: thumbKey,
+          publicUrl: thumbUpload.publicUrl,
+          mimeType: thumbnail.mimeType,
+          width: thumbnail.width,
+          height: thumbnail.height,
+          bytes: thumbUpload.bytes,
         });
         await attachTags(itemId, tags);
 
