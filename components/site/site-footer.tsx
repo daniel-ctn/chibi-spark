@@ -21,6 +21,17 @@ export function SiteFooter() {
               {SITE_TAGLINE} Four fresh chibis every morning — stills and short
               animations, free to download and remix.
             </p>
+            <p className="text-foreground text-sm">
+              Made by{" "}
+              <a
+                href="https://daniel-tsx.dev"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary font-display font-semibold underline-offset-4 hover:underline"
+              >
+                Daniel
+              </a>
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-6 text-sm">
