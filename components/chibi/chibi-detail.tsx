@@ -1,15 +1,35 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Download, Play } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import type { GalleryItem } from "@/features/gallery/queries";
+
 import { ChibiGrid } from "@/components/chibi/chibi-grid";
+import { SectionHeading } from "@/components/site/page-header";
+import { Button } from "@/components/ui/button";
+import type { GalleryItem } from "@/features/gallery/queries";
+import { cn } from "@/lib/utils";
 
 interface ChibiDetailProps {
   item: GalleryItem;
   relatedItems?: GalleryItem[];
+}
+
+function MetaBlock({
+  label,
+  children,
+  className,
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("space-y-2", className)}>
+      <p className="text-muted-foreground text-xs font-semibold tracking-[0.12em] uppercase">
+        {label}
+      </p>
+      <div>{children}</div>
+    </div>
+  );
 }
 
 export function ChibiDetail({ item, relatedItems = [] }: ChibiDetailProps) {
@@ -19,144 +39,133 @@ export function ChibiDetail({ item, relatedItems = [] }: ChibiDetailProps) {
 
   if (!imageAsset) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
+      <div className="surface-inset flex min-h-[400px] items-center justify-center">
         <p className="text-muted-foreground">Image not found</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <Button variant="ghost" asChild className="mb-4">
-          <Link href="/gallery">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to gallery
-          </Link>
-        </Button>
-      </div>
+    <div className="space-y-12">
+      <Button variant="ghost" asChild className="-ml-2 rounded-full">
+        <Link href="/gallery">
+          <ArrowLeft />
+          Back to gallery
+        </Link>
+      </Button>
 
-      <div className="grid gap-8 lg:grid-cols-2">
-        {/* Image/Animation Display */}
+      <div className="grid gap-10 xl:grid-cols-[1.15fr_0.85fr]">
         <div className="space-y-4">
-          <Card>
-            <CardContent className="p-0">
-              <div className="relative aspect-square overflow-hidden rounded-lg">
-                <Image
-                  src={imageAsset.publicUrl}
-                  alt={chibi.title}
-                  fill
-                  className="object-contain"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  priority
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <div className="sticker-frame p-3">
+            <div className="bg-surface-inset relative aspect-square overflow-hidden rounded-xl">
+              <Image
+                src={imageAsset.publicUrl}
+                alt={chibi.title}
+                fill
+                className="object-contain p-2"
+                sizes="(max-width: 1280px) 100vw, 60vw"
+                priority
+              />
+            </div>
+          </div>
 
           {animationAsset && (
-            <Card>
-              <CardContent className="p-4">
-                <div className="mb-2 flex items-center gap-2">
-                  <Play className="h-4 w-4" />
-                  <h3 className="font-semibold">Animation</h3>
-                </div>
-                <video
-                  src={animationAsset.publicUrl}
-                  controls
-                  className="w-full rounded-lg"
-                  poster={imageAsset.publicUrl}
-                />
-              </CardContent>
-            </Card>
+            <div className="surface-panel p-4 sm:p-5">
+              <div className="mb-3 flex items-center gap-2">
+                <Play className="text-primary h-4 w-4" />
+                <h2 className="font-display text-lg font-semibold">Animated clip</h2>
+              </div>
+              <video
+                src={animationAsset.publicUrl}
+                controls
+                className="w-full rounded-xl"
+                poster={imageAsset.publicUrl}
+              />
+            </div>
           )}
         </div>
 
-        {/* Metadata */}
-        <div className="space-y-6">
-          <div>
-            <h1 className="mb-2 text-3xl font-bold">{chibi.title}</h1>
+        <div className="space-y-8">
+          <div className="space-y-3">
+            <p className="section-kicker">Chibi detail</p>
+            <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+              {chibi.title}
+            </h1>
             {chibi.shortDescription && (
-              <p className="text-muted-foreground text-lg">{chibi.shortDescription}</p>
+              <p className="text-muted-foreground text-lg leading-relaxed">
+                {chibi.shortDescription}
+              </p>
+            )}
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-2">
+            <Button asChild size="lg" className="w-full">
+              <a href={imageAsset.publicUrl} download>
+                <Download />
+                Download image
+              </a>
+            </Button>
+            {animationAsset && (
+              <Button asChild size="lg" variant="outline" className="w-full">
+                <a href={animationAsset.publicUrl} download>
+                  <Download />
+                  Download clip
+                </a>
+              </Button>
             )}
           </div>
 
           {tags.length > 0 && (
-            <div>
-              <h3 className="mb-2 font-semibold">Tags</h3>
+            <MetaBlock label="Tags">
               <div className="flex flex-wrap gap-2">
                 {tags.map((tag) => (
-                  <Link key={tag.id} href={`/gallery?tags=${tag.slug}`}>
-                    <Badge
-                      variant="secondary"
-                      className="hover:bg-secondary/80 cursor-pointer"
-                    >
-                      {tag.name}
-                    </Badge>
+                  <Link
+                    key={tag.id}
+                    href={`/gallery?tags=${tag.slug}`}
+                    className="pill-tag"
+                  >
+                    {tag.name}
                   </Link>
                 ))}
               </div>
-            </div>
+            </MetaBlock>
           )}
 
-          <div>
-            <h3 className="mb-2 font-semibold">Theme</h3>
-            <p className="text-muted-foreground">{chibi.theme}</p>
-          </div>
+          <MetaBlock label="Theme">
+            <p className="text-muted-foreground leading-relaxed">{chibi.theme}</p>
+          </MetaBlock>
 
           {sourceProposal && (
-            <div>
-              <h3 className="mb-2 font-semibold">Community idea</h3>
-              <p className="text-muted-foreground text-sm">
+            <MetaBlock label="Community idea">
+              <p className="text-muted-foreground text-sm leading-relaxed">
                 Suggested by{" "}
                 <span className="text-foreground font-medium">
                   {sourceProposal.nickname ?? "Anonymous"}
                 </span>
                 : &ldquo;{sourceProposal.ideaText}&rdquo;
               </p>
-            </div>
+            </MetaBlock>
           )}
 
           {chibi.prompt && (
-            <div>
-              <h3 className="mb-2 font-semibold">Prompt</h3>
-              <p className="bg-muted rounded-lg p-3 text-sm">{chibi.prompt}</p>
-            </div>
+            <MetaBlock label="Prompt">
+              <p className="surface-inset text-muted-foreground rounded-xl p-4 text-sm leading-relaxed">
+                {chibi.prompt}
+              </p>
+            </MetaBlock>
           )}
 
-          <div className="space-y-3">
-            <h3 className="font-semibold">Download</h3>
-            <div className="flex flex-col gap-2">
-              <Button asChild className="w-full">
-                <a href={imageAsset.publicUrl} download>
-                  <Download className="mr-2 h-4 w-4" />
-                  Download image
-                </a>
-              </Button>
-              {animationAsset && (
-                <Button asChild variant="outline" className="w-full">
-                  <a href={animationAsset.publicUrl} download>
-                    <Download className="mr-2 h-4 w-4" />
-                    Download animation
-                  </a>
-                </Button>
-              )}
-            </div>
+          <div className="surface-panel border-primary/15 bg-accent/40 p-4">
+            <p className="text-sm leading-relaxed">
+              <span className="text-primary font-semibold">Free to use.</span> Download
+              and use for any purpose — personal, commercial, remix, whatever. No
+              attribution required.
+            </p>
           </div>
 
-          <Card className="border-primary/20 bg-primary/5">
-            <CardContent className="p-4">
-              <p className="text-sm">
-                <strong className="text-primary">Free to use:</strong> All ChibiDrop
-                content is free to download and use for any purpose. No attribution
-                required.
-              </p>
-            </CardContent>
-          </Card>
-
-          <div className="text-muted-foreground text-xs">
-            <p>
-              Published:{" "}
+          <div className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-xs">
+            <span>
+              Published{" "}
               {chibi.publishedAt
                 ? new Date(chibi.publishedAt).toLocaleDateString("en-US", {
                     year: "numeric",
@@ -164,15 +173,19 @@ export function ChibiDetail({ item, relatedItems = [] }: ChibiDetailProps) {
                     day: "numeric",
                   })
                 : "Unknown"}
-            </p>
-            {chibi.viewCount > 0 && <p>Views: {chibi.viewCount}</p>}
+            </span>
+            {chibi.viewCount > 0 && <span>{chibi.viewCount.toLocaleString()} views</span>}
           </div>
         </div>
       </div>
 
       {relatedItems.length > 0 && (
         <section>
-          <h2 className="mb-6 text-2xl font-semibold tracking-tight">Related chibis</h2>
+          <SectionHeading
+            kicker="More like this"
+            title="Related chibis"
+            className="mb-6"
+          />
           <ChibiGrid items={relatedItems} />
         </section>
       )}

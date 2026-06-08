@@ -24,7 +24,7 @@ export function GalleryPagination({
 
   return (
     <nav
-      className={cn("mt-10 flex items-center justify-between gap-4", className)}
+      className={cn("mt-12 flex items-center justify-between gap-4", className)}
       aria-label="Gallery pagination"
     >
       {prevPage ? (
@@ -38,7 +38,7 @@ export function GalleryPagination({
         <div />
       )}
 
-      <p className="text-muted-foreground text-sm">
+      <p className="text-muted-foreground font-display text-sm font-medium">
         Page {currentPage} of {totalPages}
       </p>
 
