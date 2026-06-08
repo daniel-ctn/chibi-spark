@@ -84,9 +84,11 @@ export function ChibiDetail({ item }: ChibiDetailProps) {
               <h3 className="mb-2 font-semibold">Tags</h3>
               <div className="flex flex-wrap gap-2">
                 {tags.map((tag) => (
-                  <Badge key={tag.id} variant="secondary">
-                    {tag.name}
-                  </Badge>
+                  <Link key={tag.id} href={`/gallery?tags=${tag.slug}`}>
+                    <Badge variant="secondary" className="cursor-pointer hover:bg-secondary/80">
+                      {tag.name}
+                    </Badge>
+                  </Link>
                 ))}
               </div>
             </div>
