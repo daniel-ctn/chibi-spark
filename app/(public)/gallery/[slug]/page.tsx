@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ChibiDetail } from "@/components/chibi/chibi-detail";
 import { getChibiBySlug } from "@/features/gallery/queries";
+import { incrementChibiViewCount } from "@/lib/db/queries/chibi-items";
 
 interface DetailPageProps {
   params: Promise<{ slug: string }>;
@@ -46,6 +47,8 @@ export default async function DetailPage({ params }: DetailPageProps) {
   if (!item) {
     notFound();
   }
+
+  await incrementChibiViewCount(slug);
 
   return (
     <div className="container-page py-8">

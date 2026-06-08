@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   chibiAssets,
@@ -118,4 +118,11 @@ export async function attachTags(itemId: string, tagNames: string[]) {
   }));
 
   await db.insert(chibiItemTags).values(joins).onConflictDoNothing();
+}
+
+export async function incrementChibiViewCount(slug: string): Promise<void> {
+  await db
+    .update(chibiItems)
+    .set({ viewCount: sql`${chibiItems.viewCount} + 1` })
+    .where(eq(chibiItems.slug, slug));
 }
