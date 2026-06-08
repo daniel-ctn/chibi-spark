@@ -11,7 +11,7 @@ interface ChibiDetailProps {
 }
 
 export function ChibiDetail({ item }: ChibiDetailProps) {
-  const { item: chibi, assets, tags } = item;
+  const { item: chibi, assets, tags, sourceProposal } = item;
   const imageAsset = assets.find((a) => a.assetType === "image");
   const animationAsset = assets.find((a) => a.assetType === "animation");
 
@@ -96,6 +96,19 @@ export function ChibiDetail({ item }: ChibiDetailProps) {
             <h3 className="mb-2 font-semibold">Theme</h3>
             <p className="text-muted-foreground">{chibi.theme}</p>
           </div>
+
+          {sourceProposal && (
+            <div>
+              <h3 className="mb-2 font-semibold">Community idea</h3>
+              <p className="text-muted-foreground text-sm">
+                Suggested by{" "}
+                <span className="text-foreground font-medium">
+                  {sourceProposal.nickname ?? "Anonymous"}
+                </span>
+                : &ldquo;{sourceProposal.ideaText}&rdquo;
+              </p>
+            </div>
+          )}
 
           {chibi.prompt && (
             <div>

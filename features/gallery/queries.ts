@@ -5,9 +5,11 @@ import {
   chibiItemTags,
   chibiItems,
   chibiTags,
+  proposals,
   type ChibiAsset,
   type ChibiItem,
   type ChibiTag,
+  type Proposal,
 } from "@/lib/db/schema";
 
 export interface GalleryFilters {
@@ -22,6 +24,7 @@ export interface GalleryItem {
   item: ChibiItem;
   assets: ChibiAsset[];
   tags: ChibiTag[];
+  sourceProposal?: Pick<Proposal, "id" | "nickname" | "ideaText"> | null;
 }
 
 export async function getGalleryItems(
@@ -131,10 +134,25 @@ export async function getChibiBySlug(slug: string): Promise<GalleryItem | null> 
     .innerJoin(chibiTags, eq(chibiItemTags.tagId, chibiTags.id))
     .where(eq(chibiItemTags.chibiItemId, item.id));
 
+  let sourceProposal: GalleryItem["sourceProposal"] = null;
+  if (item.sourceProposalId) {
+    const [proposal] = await db
+      .select({
+        id: proposals.id,
+        nickname: proposals.nickname,
+        ideaText: proposals.ideaText,
+      })
+      .from(proposals)
+      .where(eq(proposals.id, item.sourceProposalId))
+      .limit(1);
+    sourceProposal = proposal ?? null;
+  }
+
   return {
     item,
     assets,
     tags: tagRows.map((r) => r.tag),
+    sourceProposal,
   };
 }
 

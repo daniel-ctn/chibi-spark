@@ -8,6 +8,7 @@ import type {
   ChibiMetadata,
   ExpandedPrompt,
   PickDailyThemesInput,
+  PickedTheme,
   SafetyClassification,
   TextGenerationService,
 } from "./service";
@@ -34,7 +35,15 @@ const metadataSchema = z.object({
 });
 
 const pickThemesSchema = z.object({
-  themes: z.array(z.string().min(2).max(80)).min(1).max(8),
+  picks: z
+    .array(
+      z.object({
+        theme: z.string().min(2).max(80),
+        sourceProposalId: z.string().nullable(),
+      }),
+    )
+    .min(1)
+    .max(8),
 });
 
 const safetySchema = z.object({
@@ -102,7 +111,9 @@ class OpenAITextService implements TextGenerationService {
     return object;
   }
 
-  async pickDailyThemes(input: PickDailyThemesInput): Promise<string[]> {
+  async pickDailyThemes(input: PickDailyThemesInput): Promise<PickedTheme[]> {
+    const proposalIds = new Set(input.proposals.map((p) => p.id));
+
     const { object } = await generateObject({
       model: this.textModel(),
       schema: pickThemesSchema,
@@ -115,14 +126,23 @@ class OpenAITextService implements TextGenerationService {
         ``,
         `User proposals (already approved as safe):`,
         ...(input.proposals.length
-          ? input.proposals.map((t) => `- ${t}`)
+          ? input.proposals.map((p) => `- [id: ${p.id}] ${p.ideaText}`)
           : ["(none this round)"]),
         ``,
-        `Mix curated and user proposals so the drop feels fresh. Return`,
-        `exactly ${input.count} themes as a JSON array of strings.`,
+        `Mix curated and user proposals so the drop feels fresh.`,
+        `Return exactly ${input.count} picks. For each pick:`,
+        `- "theme": a short chibi theme string`,
+        `- "sourceProposalId": the proposal id if based on a user proposal, otherwise null`,
       ].join("\n"),
     });
-    return object.themes;
+
+    return object.picks.slice(0, input.count).map((pick) => ({
+      theme: pick.theme,
+      sourceProposalId:
+        pick.sourceProposalId && proposalIds.has(pick.sourceProposalId)
+          ? pick.sourceProposalId
+          : null,
+    }));
   }
 
   async classifySafety(input: { text: string }): Promise<SafetyClassification> {

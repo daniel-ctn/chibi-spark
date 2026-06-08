@@ -69,28 +69,35 @@ export async function runDailyDrop(
   try {
     // 3. Pick themes
     const approvedProposals = await getApprovedProposalsForPicking(20);
-    const themes = await openaiText.pickDailyThemes({
+    const picks = await openaiText.pickDailyThemes({
       curated: [...CURATED_THEMES],
-      proposals: approvedProposals.map((p) => p.ideaText),
+      proposals: approvedProposals,
       count: 4,
       date: ymd,
     });
-    log.info("picked themes", { themes });
+    log.info("picked themes", {
+      picks: picks.map((p) => ({
+        theme: p.theme,
+        sourceProposalId: p.sourceProposalId,
+      })),
+    });
 
     // 4. Generate items
     const items: string[] = [];
     const animatedItems: string[] = [];
     const animateCount = env.ANIMATE_PER_BATCH;
+    const usedProposalIds: string[] = [];
 
-    for (let i = 0; i < themes.length; i++) {
-      const theme = themes[i];
-      if (!theme) {
-        log.warn("skipped undefined theme", { index: i });
+    for (let i = 0; i < picks.length; i++) {
+      const pick = picks[i];
+      if (!pick) {
+        log.warn("skipped undefined pick", { index: i });
         continue;
       }
 
+      const { theme, sourceProposalId } = pick;
       const itemStart = Date.now();
-      const itemLog = log.child({ theme, index: i });
+      const itemLog = log.child({ theme, index: i, sourceProposalId });
 
       try {
         // a. Expand prompt
@@ -129,7 +136,7 @@ export async function runDailyDrop(
           id: itemId,
           slug,
           batchId,
-          sourceProposalId: null,
+          sourceProposalId,
           title,
           theme,
           prompt,
@@ -152,6 +159,10 @@ export async function runDailyDrop(
         await attachTags(itemId, tags);
 
         items.push(itemId);
+
+        if (sourceProposalId) {
+          usedProposalIds.push(sourceProposalId);
+        }
 
         // f. Queue animation if within quota
         if (i < animateCount) {
@@ -199,10 +210,7 @@ export async function runDailyDrop(
       completedAt: new Date(),
     });
 
-    // 6. Mark proposals as used (if any were picked)
-    const usedProposalIds = approvedProposals
-      .filter((p) => themes.some((t) => t.includes(p.ideaText.slice(0, 30))))
-      .map((p) => p.id);
+    // 6. Mark proposals as used
     if (usedProposalIds.length > 0) {
       await markProposalsAsUsed(usedProposalIds);
       log.info("marked proposals as used", { count: usedProposalIds.length });
@@ -220,7 +228,7 @@ export async function runDailyDrop(
       batchId,
       itemCount: items.length,
       animatedCount: animatedItems.length,
-      themes,
+      themes: picks.map((p) => p.theme),
       durationMs,
     };
   } catch (err) {

@@ -28,15 +28,26 @@ export interface SafetyClassification {
   reason?: string;
 }
 
+export interface ProposalForPicking {
+  id: string;
+  ideaText: string;
+}
+
 export interface PickDailyThemesInput {
   /** Curated default themes, safe picks. */
   curated: string[];
   /** User-submitted proposals that have already been approved as safe. */
-  proposals: string[];
+  proposals: ProposalForPicking[];
   /** How many themes to pick. */
   count: number;
   /** ISO date string for the drop, e.g. "2026-06-01". */
   date: string;
+}
+
+export interface PickedTheme {
+  theme: string;
+  /** Set when the theme came from a user proposal; null for curated picks. */
+  sourceProposalId: string | null;
 }
 
 export interface TextGenerationService {
@@ -47,7 +58,7 @@ export interface TextGenerationService {
   generateMetadata(input: { theme: string; prompt: string }): Promise<ChibiMetadata>;
 
   /** Pick a balanced set of themes for the day's batch. */
-  pickDailyThemes(input: PickDailyThemesInput): Promise<string[]>;
+  pickDailyThemes(input: PickDailyThemesInput): Promise<PickedTheme[]>;
 
   /** Classify free text for safety. Used to gate user-submitted proposals. */
   classifySafety(input: { text: string }): Promise<SafetyClassification>;

@@ -12,6 +12,8 @@ export type {
   ChibiMetadata,
   ExpandedPrompt,
   PickDailyThemesInput,
+  PickedTheme,
+  ProposalForPicking,
   SafetyClassification,
   SafetyLabel,
 } from "./text/service";
