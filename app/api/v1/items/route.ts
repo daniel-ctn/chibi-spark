@@ -37,7 +37,7 @@ export async function GET(request: Request) {
     tags,
     animatedOnly: animatedOnly || undefined,
     limit,
-    offset: safeOffset,
+    offset,
   };
 
   const [items, total] = await Promise.all([
@@ -50,7 +50,7 @@ export async function GET(request: Request) {
       items: items.map(serializeGalleryItem),
       pagination: {
         limit,
-        offset: safeOffset,
+        offset,
         total,
         pageSize: GALLERY_PAGE_SIZE,
       },
