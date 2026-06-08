@@ -1,14 +1,17 @@
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
+import { getBatchByDate } from "@/lib/db/queries/daily-batches";
 import {
   chibiAssets,
   chibiItemTags,
   chibiItems,
   chibiTags,
+  dailyBatches,
   proposals,
   type ChibiAsset,
   type ChibiItem,
   type ChibiTag,
+  type DailyBatch,
   type Proposal,
 } from "@/lib/db/schema";
 
@@ -16,6 +19,7 @@ export interface GalleryFilters {
   search?: string;
   tags?: string[];
   animatedOnly?: boolean;
+  batchId?: string;
   limit?: number;
   offset?: number;
 }
@@ -46,6 +50,10 @@ export async function getGalleryItems(
 
   if (animatedOnly) {
     conditions.push(eq(chibiItems.isAnimated, true));
+  }
+
+  if (filters.batchId) {
+    conditions.push(eq(chibiItems.batchId, filters.batchId));
   }
 
   if (tags && tags.length > 0) {
@@ -112,6 +120,33 @@ export async function getGalleryItems(
   }
 
   return galleryItems;
+}
+
+export async function getDropByDate(
+  generationDate: string,
+): Promise<{ batch: DailyBatch | null; items: GalleryItem[] }> {
+  const batch = await getBatchByDate(generationDate);
+  if (!batch || batch.status !== "done") {
+    return { batch: batch ?? null, items: [] };
+  }
+
+  const items = await getGalleryItems({ batchId: batch.id, limit: 20 });
+  return { batch, items };
+}
+
+export async function getRecentDropDates(limit = 14): Promise<string[]> {
+  const batches = await db
+    .select({ generationDate: dailyBatches.generationDate })
+    .from(dailyBatches)
+    .where(eq(dailyBatches.status, "done"))
+    .orderBy(desc(dailyBatches.generationDate))
+    .limit(limit);
+
+  return batches.map((b) => b.generationDate);
+}
+
+export function todayUtcDateString(date = new Date()): string {
+  return date.toISOString().slice(0, 10);
 }
 
 export async function getChibiBySlug(slug: string): Promise<GalleryItem | null> {

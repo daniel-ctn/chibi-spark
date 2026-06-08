@@ -1,12 +1,12 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ArrowRight, Sparkles, Wand2, Image as ImageIcon, Video } from "lucide-react";
+import { ArrowRight, Calendar, Sparkles, Wand2, Image as ImageIcon, Video } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ChibiGrid } from "@/components/chibi/chibi-grid";
-import { getGalleryItems } from "@/features/gallery/queries";
+import { getDropByDate, getGalleryItems, todayUtcDateString } from "@/features/gallery/queries";
 import { SITE_TAGLINE } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
@@ -36,7 +36,11 @@ const HOW_IT_WORKS = [
 ];
 
 export default async function HomePage() {
-  const latestItems = await getGalleryItems({ limit: 8 });
+  const today = todayUtcDateString();
+  const [{ items: todaysDrop }, latestItems] = await Promise.all([
+    getDropByDate(today),
+    getGalleryItems({ limit: 8 }),
+  ]);
 
   return (
     <div className="flex flex-col">
@@ -104,6 +108,28 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      {todaysDrop.length > 0 && (
+        <section className="border-border/60 container-page border-b py-16 sm:py-20">
+          <div className="mb-8 flex items-center justify-between gap-4">
+            <div>
+              <Badge variant="secondary" className="mb-2">
+                <Calendar className="mr-1.5 h-3.5 w-3.5" />
+                Today&apos;s drop
+              </Badge>
+              <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                Fresh from this morning
+              </h2>
+            </div>
+            <Button asChild variant="outline">
+              <Link href={`/drops/${today}`}>
+                View drop <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+          <ChibiGrid items={todaysDrop} />
+        </section>
+      )}
 
       {/* Latest drops */}
       <section className="container-page pb-20">
