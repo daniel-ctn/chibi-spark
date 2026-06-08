@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
-import { Lightbulb } from "lucide-react";
+import { Lightbulb, MessageCircleHeart, ShieldCheck, Sparkles } from "lucide-react";
 
 import { ProposalForm } from "@/components/proposals/proposal-form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { PageHeader } from "@/components/site/page-header";
 import { SITE_NAME } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -17,65 +11,62 @@ export const metadata: Metadata = {
     "Suggest a cute chibi idea for future daily drops. No account needed, no strings attached.",
 };
 
+const NOTES = [
+  {
+    icon: MessageCircleHeart,
+    title: "Anonymous submissions",
+    body: "No account needed. We only store a hashed IP for rate limiting.",
+  },
+  {
+    icon: Sparkles,
+    title: "Community mix",
+    body: "Safe proposals can appear in future daily drops alongside curated themes.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Moderated",
+    body: "AI checks every idea before it enters the queue.",
+  },
+];
+
 export default function ProposePage() {
   return (
-    <div className="container-page py-12 sm:py-16">
-      <div className="mx-auto max-w-2xl">
-        <div className="mb-8 text-center">
-          <div className="bg-primary/10 mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full">
-            <Lightbulb className="text-primary h-8 w-8" />
+    <div className="container-wide py-10 sm:py-14">
+      <div className="mx-auto max-w-3xl">
+        <PageHeader
+          kicker="Community"
+          title="Propose tomorrow's chibi"
+          description="Share a cute idea for a future drop. If it passes moderation, it may show up in the gallery."
+        />
+
+        <div className="surface-panel mb-8 p-6 sm:p-8">
+          <div className="mb-6 flex items-center gap-3">
+            <span className="bg-primary/10 text-primary inline-flex h-11 w-11 items-center justify-center rounded-2xl">
+              <Lightbulb className="h-5 w-5" />
+            </span>
+            <div>
+              <h2 className="font-display text-xl font-semibold">Your idea</h2>
+              <p className="text-muted-foreground text-sm">
+                Keep it wholesome, specific, and chibi-friendly.
+              </p>
+            </div>
           </div>
-          <h1 className="mb-3 text-3xl font-bold tracking-tight sm:text-4xl">
-            Propose a chibi idea
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Suggest a cute chibi idea for future daily drops. No account needed, no
-            strings attached.
-          </p>
+          <ProposalForm />
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Your idea</CardTitle>
-            <CardDescription>
-              Fill out the form below. We&apos;ll review your idea and it may be selected
-              for a future daily drop.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ProposalForm />
-          </CardContent>
-        </Card>
-
-        <div className="border-border/60 bg-card/50 mt-8 rounded-lg border p-6">
-          <h2 className="mb-3 text-lg font-semibold">How it works</h2>
-          <ul className="text-muted-foreground space-y-2 text-sm">
-            <li>
-              <strong className="text-foreground">No account needed:</strong> Submit ideas
-              anonymously. We only store a hashed version of your IP for rate limiting.
-            </li>
-            <li>
-              <strong className="text-foreground">Free to use:</strong> All generated
-              chibis are free to download and use for any purpose.
-            </li>
-            <li>
-              <strong className="text-foreground">Community-driven:</strong> Some
-              proposals may be selected for future daily drops. We mix your ideas with
-              curated themes.
-            </li>
-            <li>
-              <strong className="text-foreground">Moderated:</strong> We use AI to check
-              submissions for safety. Unsafe content is rejected.
-            </li>
-          </ul>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {NOTES.map((note) => (
+            <div key={note.title} className="surface-panel p-4">
+              <note.icon className="text-primary mb-3 h-5 w-5" />
+              <h3 className="font-display mb-1 text-sm font-semibold">{note.title}</h3>
+              <p className="text-muted-foreground text-xs leading-relaxed">{note.body}</p>
+            </div>
+          ))}
         </div>
 
-        <div className="text-muted-foreground mt-6 text-center text-sm">
-          <p>
-            {SITE_NAME} is a fun, experimental project. All content is AI-generated and
-            free for public use.
-          </p>
-        </div>
+        <p className="text-muted-foreground mt-8 text-center text-sm">
+          {SITE_NAME} is a playful experiment. All generated art is free for public use.
+        </p>
       </div>
     </div>
   );

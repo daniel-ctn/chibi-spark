@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { ArrowLeft, Calendar } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 import { ChibiGrid } from "@/components/chibi/chibi-grid";
-import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/site/page-header";
 import { Button } from "@/components/ui/button";
 import { getDropByDate, getRecentDropDates } from "@/features/gallery/queries";
 
@@ -62,45 +62,35 @@ export default async function DropPage({ params }: DropPageProps) {
   const otherDates = recentDates.filter((d) => d !== date);
 
   return (
-    <div className="container-page py-8">
-      <Button variant="ghost" asChild className="mb-6">
+    <div className="container-wide py-10 sm:py-12">
+      <Button variant="ghost" asChild className="mb-6 -ml-2 rounded-full">
         <Link href="/">
-          <ArrowLeft className="mr-2 h-4 w-4" />
+          <ArrowLeft />
           Back to home
         </Link>
       </Button>
 
-      <div className="mb-8">
-        <Badge variant="secondary" className="mb-3">
-          <Calendar className="mr-1.5 h-3.5 w-3.5" />
-          Daily drop
-        </Badge>
-        <h1 className="mb-2 text-3xl font-bold tracking-tight sm:text-4xl">
-          {formatDropDate(date)}
-        </h1>
-        <p className="text-muted-foreground">
-          {items.length} chibi{items.length === 1 ? "" : "s"} in this drop. Free to
-          download and use.
-        </p>
-      </div>
+      <PageHeader
+        kicker="Daily drop"
+        title={formatDropDate(date)}
+        description={`${items.length} chibi${items.length === 1 ? "" : "s"} in this batch. Free to download and use.`}
+      />
 
       {items.length > 0 ? (
-        <ChibiGrid items={items} />
+        <ChibiGrid items={items} featuredFirst />
       ) : (
-        <div className="border-border/80 bg-card/40 rounded-2xl border border-dashed p-12 text-center">
+        <div className="surface-panel border-dashed p-12 text-center">
           <p className="text-muted-foreground">This drop has no published items yet.</p>
         </div>
       )}
 
       {otherDates.length > 0 && (
-        <div className="mt-12">
-          <h2 className="mb-4 text-lg font-semibold">Other drops</h2>
+        <div className="mt-14">
+          <h2 className="font-display mb-4 text-xl font-semibold">Other drops</h2>
           <div className="flex flex-wrap gap-2">
             {otherDates.map((dropDate) => (
-              <Link key={dropDate} href={`/drops/${dropDate}`}>
-                <Badge variant="outline" className="cursor-pointer">
-                  {dropDate}
-                </Badge>
+              <Link key={dropDate} href={`/drops/${dropDate}`} className="filter-chip">
+                {dropDate}
               </Link>
             ))}
           </div>

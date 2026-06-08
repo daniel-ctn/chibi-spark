@@ -52,7 +52,7 @@ export default async function DetailPage({ params }: DetailPageProps) {
   await incrementChibiViewCount(slug);
 
   return (
-    <div className="container-page py-8">
+    <div className="container-wide py-10 sm:py-12">
       <ChibiDetail item={item} relatedItems={relatedItems} />
     </div>
   );

@@ -1,14 +1,16 @@
 import { Suspense } from "react";
 import { Search } from "lucide-react";
+
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { ChibiGridSkeleton } from "@/components/chibi/chibi-card-skeleton";
 import { GalleryGrid } from "@/components/gallery/gallery-grid";
+import { PageHeader } from "@/components/site/page-header";
 import {
   GALLERY_PAGE_SIZE,
   getAllTags,
   type GalleryFilters,
 } from "@/features/gallery/queries";
+import { cn } from "@/lib/utils";
 
 interface GalleryPageProps {
   searchParams: Promise<{
@@ -82,18 +84,16 @@ export default async function GalleryPage({ searchParams }: GalleryPageProps) {
   const buildPageUrl = (page: number) => buildGalleryQuery({ page });
 
   return (
-    <div className="container-page py-8">
-      <div className="mb-8">
-        <h1 className="mb-2 text-3xl font-bold">Gallery</h1>
-        <p className="text-muted-foreground">
-          Browse all chibi drops. Free to download and use.
-        </p>
-      </div>
+    <div className="container-wide py-10 sm:py-12">
+      <PageHeader
+        kicker="Gallery"
+        title="Every chibi, free to keep"
+        description="Search the archive, filter by tags, and download anything you like."
+      />
 
-      {/* Search and Filters */}
-      <div className="mb-6 space-y-4">
+      <div className="surface-panel mb-8 space-y-4 p-4 sm:p-5">
         <div className="relative">
-          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <Search className="text-muted-foreground absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2" />
           <form action="/gallery" method="GET">
             {selectedTags.length > 0 && (
               <input type="hidden" name="tags" value={selectedTags.join(",")} />
@@ -101,21 +101,19 @@ export default async function GalleryPage({ searchParams }: GalleryPageProps) {
             {animatedOnly && <input type="hidden" name="animated" value="true" />}
             <Input
               name="q"
-              placeholder="Search chibis..."
+              placeholder="Search by title, theme, or description..."
               defaultValue={search}
-              className="pl-10"
+              className="pl-11"
             />
           </form>
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <a href={buildFilterUrl({ toggleAnimated: animatedOnly ? "false" : "true" })}>
-            <Badge
-              variant={animatedOnly ? "default" : "outline"}
-              className="cursor-pointer"
-            >
-              Animated only
-            </Badge>
+          <a
+            href={buildFilterUrl({ toggleAnimated: animatedOnly ? "false" : "true" })}
+            className={cn("filter-chip", animatedOnly && "filter-chip-active")}
+          >
+            Animated only
           </a>
           {allTags.map((tag) => {
             const isSelected = selectedTags.includes(tag.slug);
@@ -125,20 +123,15 @@ export default async function GalleryPage({ searchParams }: GalleryPageProps) {
                 href={buildFilterUrl(
                   isSelected ? { removeTag: tag.slug } : { addTag: tag.slug },
                 )}
+                className={cn("filter-chip", isSelected && "filter-chip-active")}
               >
-                <Badge
-                  variant={isSelected ? "default" : "secondary"}
-                  className="cursor-pointer"
-                >
-                  {tag.name}
-                </Badge>
+                {tag.name}
               </a>
             );
           })}
         </div>
       </div>
 
-      {/* Results */}
       <Suspense fallback={<ChibiGridSkeleton count={12} />}>
         <GalleryGrid
           filters={filters}
