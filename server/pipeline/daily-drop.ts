@@ -16,6 +16,7 @@ import {
   attachTags,
   createJob,
 } from "@/lib/db/queries";
+import { resolveBatchOutcome } from "@/server/pipeline/batch-outcome";
 
 export interface DailyDropResult {
   status: "created" | "skipped_already_done" | "skipped_in_progress" | "failed";
@@ -230,9 +231,10 @@ export async function runDailyDrop(
 
     // 5. Update batch
     const expectedCount = picks.length;
-    const failedCount = expectedCount - items.length;
-    const partial = items.length > 0 && failedCount > 0;
-    const batchStatus = items.length === 0 ? "failed" : "done";
+    const { batchStatus, failedCount, partial } = resolveBatchOutcome(
+      items.length,
+      expectedCount,
+    );
 
     await updateBatch(batchId, {
       status: batchStatus,
@@ -250,7 +252,11 @@ export async function runDailyDrop(
 
     if (batchStatus === "failed") {
       const durationMs = Date.now() - start;
-      log.error("daily drop produced no items", { expectedCount, failedCount, durationMs });
+      log.error("daily drop produced no items", {
+        expectedCount,
+        failedCount,
+        durationMs,
+      });
       return {
         status: "failed",
         batchId,
